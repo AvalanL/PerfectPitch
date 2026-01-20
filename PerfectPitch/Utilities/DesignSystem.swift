@@ -301,6 +301,7 @@ struct PPFont {
     // Display - Large headlines
     static func displayLarge() -> Font { .system(size: 34, weight: .bold, design: .rounded) }
     static func displayMedium() -> Font { .system(size: 28, weight: .bold, design: .rounded) }
+    static func displaySmall() -> Font { .system(size: 24, weight: .bold, design: .rounded) }
 
     // Title - Section headers
     static func titleLarge() -> Font { .system(size: 22, weight: .semibold, design: .rounded) }

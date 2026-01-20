@@ -259,7 +259,7 @@ class ExerciseViewModel: ObservableObject {
     }
 
     func playCurrentSound(audioEngine: AudioEngine) {
-        guard let question = currentQuestion else { return }
+        guard currentQuestion != nil else { return }
 
         // Generate appropriate sound based on category
         switch session.category {

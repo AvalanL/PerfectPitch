@@ -23,7 +23,7 @@ struct PerfectPitchApp: App {
 
     private func setupNotifications() {
         Task {
-            await notificationManager.onAppLaunch(
+            notificationManager.onAppLaunch(
                 currentStreak: userManager.currentUser.stats.currentStreak,
                 hasPracticedToday: userManager.hasPracticedToday,
                 lastPracticeDate: userManager.currentUser.stats.lastPracticeDate

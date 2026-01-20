@@ -370,14 +370,14 @@ class NotificationManager: ObservableObject {
 
     // MARK: - Badge Management
     func clearBadge() {
-        Task { @MainActor in
-            UIApplication.shared.applicationIconBadgeNumber = 0
+        Task {
+            try? await center.setBadgeCount(0)
         }
     }
 
     func setBadge(_ count: Int) {
-        Task { @MainActor in
-            UIApplication.shared.applicationIconBadgeNumber = count
+        Task {
+            try? await center.setBadgeCount(count)
         }
     }
 

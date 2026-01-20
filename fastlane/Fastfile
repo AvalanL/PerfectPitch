@@ -5,7 +5,6 @@
 #   fastlane beta              - Build and upload to TestFlight
 #   fastlane release           - Build and upload to App Store
 #   fastlane screenshots       - Capture screenshots
-#   fastlane certificates      - Sync certificates using match
 #   fastlane test              - Run tests
 
 default_platform(:ios)
@@ -14,7 +13,7 @@ platform :ios do
   # ==========================================
   # CONFIGURATION
   # ==========================================
-  XCODEPROJ = "PerfectPitch/PerfectPitch.xcodeproj"
+  XCODEPROJ = "PerfectPitch.xcodeproj"
   SCHEME = "PerfectPitch"
 
   # ==========================================
@@ -44,24 +43,34 @@ platform :ios do
   desc "Push a new beta build to TestFlight"
   desc "Options: build_number, changelog"
   lane :beta do |options|
-    # Sync certificates
-    certificates_appstore
-
     # Increment build number
-    new_build = options[:build_number] || (latest_testflight_build_number + 1)
+    build_num = options[:build_number]
+    if build_num.nil?
+      begin
+        build_num = latest_testflight_build_number + 1
+      rescue
+        build_num = 1
+      end
+    end
+
     increment_build_number(
       xcodeproj: XCODEPROJ,
-      build_number: new_build
+      build_number: build_num
     )
 
-    # Build the app
+    # Build the app with automatic signing
     build_app(
       scheme: SCHEME,
       export_method: "app-store",
       output_directory: "./build",
       output_name: "PerfectPitch.ipa",
       clean: true,
-      include_bitcode: false
+      include_bitcode: false,
+      export_options: {
+        signingStyle: "automatic",
+        uploadBitcode: false,
+        uploadSymbols: true
+      }
     )
 
     # Upload to TestFlight
@@ -76,7 +85,7 @@ platform :ios do
     clean_build_artifacts
 
     # Notify
-    puts "✅ Build #{new_build} uploaded to TestFlight!"
+    puts "✅ Build #{build_num} uploaded to TestFlight!"
   end
 
   # ==========================================
@@ -85,9 +94,6 @@ platform :ios do
   desc "Push a new release build to the App Store"
   desc "Options: version (patch/minor/major), submit (true/false)"
   lane :release do |options|
-    # Sync certificates
-    certificates_appstore
-
     # Bump version if specified
     if options[:version]
       increment_version_number(
@@ -97,22 +103,34 @@ platform :ios do
     end
 
     # Increment build number
+    build_num = nil
+    begin
+      build_num = latest_testflight_build_number + 1
+    rescue
+      build_num = 1
+    end
+
     increment_build_number(
       xcodeproj: XCODEPROJ,
-      build_number: latest_testflight_build_number + 1
+      build_number: build_num
     )
 
     version = get_version_number(xcodeproj: XCODEPROJ)
     build = get_build_number(xcodeproj: XCODEPROJ)
 
-    # Build the app
+    # Build the app with automatic signing
     build_app(
       scheme: SCHEME,
       export_method: "app-store",
       output_directory: "./build",
       output_name: "PerfectPitch.ipa",
       clean: true,
-      include_bitcode: false
+      include_bitcode: false,
+      export_options: {
+        signingStyle: "automatic",
+        uploadBitcode: false,
+        uploadSymbols: true
+      }
     )
 
     # Upload to App Store
@@ -160,31 +178,6 @@ platform :ios do
       path: "./fastlane/screenshots",
       white: true
     )
-  end
-
-  # ==========================================
-  # CERTIFICATES (using Match)
-  # ==========================================
-  desc "Sync development certificates"
-  lane :certificates_dev do
-    match(
-      type: "development",
-      readonly: is_ci
-    )
-  end
-
-  desc "Sync App Store certificates"
-  lane :certificates_appstore do
-    match(
-      type: "appstore",
-      readonly: is_ci
-    )
-  end
-
-  desc "Sync all certificates"
-  lane :certificates do
-    certificates_dev
-    certificates_appstore
   end
 
   # ==========================================

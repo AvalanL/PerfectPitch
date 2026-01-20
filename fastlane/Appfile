@@ -1,13 +1,13 @@
 # App Store Connect App ID
-# app_identifier("com.yourcompany.perfectpitch")
+app_identifier("com.perfectpitch.app")
 
 # Apple Developer Portal Team ID
-# team_id("XXXXXXXXXX")
+# team_id("XXXXXXXXXX")  # Will be prompted or set automatically
 
 # App Store Connect Team ID
-# itc_team_id("XXXXXXXXXX")
+# itc_team_id("XXXXXXXXXX")  # Will be prompted or set automatically
 
-# Apple ID email
+# Apple ID email - uncomment and set your email
 # apple_id("your@email.com")
 
 # For more information about the Appfile, see:

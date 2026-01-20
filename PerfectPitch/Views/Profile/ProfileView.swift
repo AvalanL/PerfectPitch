@@ -8,9 +8,9 @@ struct ProfileView: View {
     @State private var showEditProfile = false
     @State private var showNotificationSettings = false
 
-    // GitHub Pages URLs - update these once your repo is set up
-    private let supportURL = URL(string: "https://perfectpitch-app.github.io/support/")!
-    private let privacyURL = URL(string: "https://perfectpitch-app.github.io/support/privacy.html")!
+    // GitHub Pages URLs
+    private let supportURL = URL(string: "https://avalanl.github.io/PerfectPitch/")!
+    private let privacyURL = URL(string: "https://avalanl.github.io/PerfectPitch/privacy.html")!
 
     var body: some View {
         NavigationStack {

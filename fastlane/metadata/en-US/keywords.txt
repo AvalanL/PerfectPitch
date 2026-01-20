@@ -1,1 +1,1 @@
-ear training,perfect pitch,music,learn music,piano,notes,chords,intervals,absolute pitch,musician,music theory,sight singing,solfege,music education,pitch training
+ear training,perfect pitch,AI,music,piano,notes,chords,intervals,absolute pitch,musician,music theory,solfege,pitch,tuner,learn

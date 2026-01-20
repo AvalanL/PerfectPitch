@@ -1,0 +1,40 @@
+# Snapfile - Screenshot configuration for Perfect Pitch
+
+# A list of devices to capture screenshots on
+devices([
+  "iPhone 16 Pro Max",
+  "iPhone 16 Pro",
+  "iPhone 16",
+  "iPhone SE (3rd generation)",
+  "iPad Pro (12.9-inch) (6th generation)",
+  "iPad Pro (11-inch) (4th generation)"
+])
+
+# Languages for screenshots
+languages([
+  "en-US"
+])
+
+# The name of the scheme for the UI tests
+scheme("PerfectPitchUITests")
+
+# Where to save screenshots
+output_directory("./fastlane/screenshots")
+
+# Clear previous screenshots
+clear_previous_screenshots(true)
+
+# Arguments to pass to the app
+# launch_arguments(["-screenshots"])
+
+# Clean the simulator before running
+# clean(true)
+
+# Reinstall app before running
+# reinstall_app(true)
+
+# Localize simulator
+# localize_simulator(true)
+
+# Dark mode screenshots
+# dark_mode(true)

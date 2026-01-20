@@ -1,0 +1,12 @@
+Welcome to Perfect Pitch!
+
+This initial release includes:
+- Complete single note training with multiple difficulty levels
+- Chord recognition exercises
+- Interval training with song associations
+- Scale and mode identification
+- XP system and achievements
+- Daily challenges and streak tracking
+- Beautiful dark mode support
+
+We're just getting started. More features coming soon!

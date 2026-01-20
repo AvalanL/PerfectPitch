@@ -1,0 +1,255 @@
+# Fastfile for PerfectPitch iOS App
+# https://docs.fastlane.tools
+#
+# USAGE:
+#   fastlane beta              - Build and upload to TestFlight
+#   fastlane release           - Build and upload to App Store
+#   fastlane screenshots       - Capture screenshots
+#   fastlane certificates      - Sync certificates using match
+#   fastlane test              - Run tests
+
+default_platform(:ios)
+
+platform :ios do
+  # ==========================================
+  # CONFIGURATION
+  # ==========================================
+  XCODEPROJ = "PerfectPitch/PerfectPitch.xcodeproj"
+  SCHEME = "PerfectPitch"
+
+  # ==========================================
+  # BEFORE ALL
+  # ==========================================
+  before_all do |lane|
+    # Ensure we have a clean git state (optional - comment out if not needed)
+    # ensure_git_status_clean
+  end
+
+  # ==========================================
+  # TESTING
+  # ==========================================
+  desc "Run all tests"
+  lane :test do
+    run_tests(
+      scheme: SCHEME,
+      device: "iPhone 15 Pro",
+      clean: true,
+      code_coverage: true
+    )
+  end
+
+  # ==========================================
+  # BETA (TESTFLIGHT)
+  # ==========================================
+  desc "Push a new beta build to TestFlight"
+  desc "Options: build_number, changelog"
+  lane :beta do |options|
+    # Sync certificates
+    certificates_appstore
+
+    # Increment build number
+    new_build = options[:build_number] || (latest_testflight_build_number + 1)
+    increment_build_number(
+      xcodeproj: XCODEPROJ,
+      build_number: new_build
+    )
+
+    # Build the app
+    build_app(
+      scheme: SCHEME,
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "PerfectPitch.ipa",
+      clean: true,
+      include_bitcode: false
+    )
+
+    # Upload to TestFlight
+    changelog = options[:changelog] || "Bug fixes and improvements"
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      changelog: changelog,
+      distribute_external: false
+    )
+
+    # Clean up
+    clean_build_artifacts
+
+    # Notify
+    puts "✅ Build #{new_build} uploaded to TestFlight!"
+  end
+
+  # ==========================================
+  # RELEASE (APP STORE)
+  # ==========================================
+  desc "Push a new release build to the App Store"
+  desc "Options: version (patch/minor/major), submit (true/false)"
+  lane :release do |options|
+    # Sync certificates
+    certificates_appstore
+
+    # Bump version if specified
+    if options[:version]
+      increment_version_number(
+        xcodeproj: XCODEPROJ,
+        bump_type: options[:version]
+      )
+    end
+
+    # Increment build number
+    increment_build_number(
+      xcodeproj: XCODEPROJ,
+      build_number: latest_testflight_build_number + 1
+    )
+
+    version = get_version_number(xcodeproj: XCODEPROJ)
+    build = get_build_number(xcodeproj: XCODEPROJ)
+
+    # Build the app
+    build_app(
+      scheme: SCHEME,
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "PerfectPitch.ipa",
+      clean: true,
+      include_bitcode: false
+    )
+
+    # Upload to App Store
+    upload_to_app_store(
+      skip_screenshots: true, # Set to false to upload screenshots
+      skip_metadata: false,
+      submit_for_review: options[:submit] || false,
+      automatic_release: false,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        add_id_info_uses_idfa: false
+      }
+    )
+
+    # Clean up
+    clean_build_artifacts
+
+    # Tag the release
+    add_git_tag(tag: "v#{version}-#{build}")
+
+    # Notify
+    puts "✅ Version #{version} (#{build}) uploaded to App Store Connect!"
+  end
+
+  # ==========================================
+  # SCREENSHOTS
+  # ==========================================
+  desc "Capture screenshots for all device sizes"
+  lane :screenshots do
+    capture_screenshots(
+      scheme: "PerfectPitchUITests",
+      output_directory: "./fastlane/screenshots",
+      clear_previous_screenshots: true,
+      devices: [
+        "iPhone 15 Pro Max",
+        "iPhone 15 Pro",
+        "iPhone SE (3rd generation)"
+      ],
+      languages: ["en-US"]
+    )
+
+    # Frame screenshots with device frames
+    frame_screenshots(
+      path: "./fastlane/screenshots",
+      white: true
+    )
+  end
+
+  # ==========================================
+  # CERTIFICATES (using Match)
+  # ==========================================
+  desc "Sync development certificates"
+  lane :certificates_dev do
+    match(
+      type: "development",
+      readonly: is_ci
+    )
+  end
+
+  desc "Sync App Store certificates"
+  lane :certificates_appstore do
+    match(
+      type: "appstore",
+      readonly: is_ci
+    )
+  end
+
+  desc "Sync all certificates"
+  lane :certificates do
+    certificates_dev
+    certificates_appstore
+  end
+
+  # ==========================================
+  # METADATA
+  # ==========================================
+  desc "Download metadata from App Store Connect"
+  lane :download_metadata do
+    download_metadata
+  end
+
+  desc "Upload metadata to App Store Connect"
+  lane :upload_metadata do
+    upload_to_app_store(
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      force: true
+    )
+  end
+
+  desc "Upload screenshots to App Store Connect"
+  lane :upload_screenshots do
+    upload_to_app_store(
+      skip_binary_upload: true,
+      skip_metadata: true,
+      force: true
+    )
+  end
+
+  # ==========================================
+  # VERSION MANAGEMENT
+  # ==========================================
+  desc "Bump version number"
+  desc "Options: type (patch/minor/major)"
+  lane :bump do |options|
+    type = options[:type] || "patch"
+    increment_version_number(
+      xcodeproj: XCODEPROJ,
+      bump_type: type
+    )
+
+    version = get_version_number(xcodeproj: XCODEPROJ)
+    puts "📦 Version bumped to #{version}"
+  end
+
+  # ==========================================
+  # UTILITIES
+  # ==========================================
+  desc "Get current version and build number"
+  lane :version do
+    version = get_version_number(xcodeproj: XCODEPROJ)
+    build = get_build_number(xcodeproj: XCODEPROJ)
+    puts "📱 PerfectPitch v#{version} (#{build})"
+  end
+
+  desc "Clean build artifacts"
+  lane :clean do
+    clean_build_artifacts
+    sh("rm -rf ../build")
+    puts "🧹 Build artifacts cleaned"
+  end
+
+  # ==========================================
+  # ERROR HANDLING
+  # ==========================================
+  error do |lane, exception|
+    puts "❌ Error in lane #{lane}: #{exception.message}"
+  end
+end

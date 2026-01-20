@@ -1,0 +1,14 @@
+# App Store Connect App ID
+# app_identifier("com.yourcompany.perfectpitch")
+
+# Apple Developer Portal Team ID
+# team_id("XXXXXXXXXX")
+
+# App Store Connect Team ID
+# itc_team_id("XXXXXXXXXX")
+
+# Apple ID email
+# apple_id("your@email.com")
+
+# For more information about the Appfile, see:
+# https://docs.fastlane.tools/advanced/#appfile

@@ -1,0 +1,25 @@
+# Deliverfile - App Store delivery configuration
+
+# App Store Connect metadata
+# app_identifier "com.yourcompany.perfectpitch"
+
+# Price tier (0 = free, 1 = tier 1, etc.)
+# price_tier 0
+
+# Automatic release after approval
+# automatic_release false
+
+# Submit for review after upload
+# submit_for_review false
+
+# App rating configuration
+app_rating_config_path "./fastlane/metadata/app_store_rating_config.json"
+
+# Skip binary upload when just updating metadata
+# skip_binary_upload true
+
+# Categories
+# primary_category "EDUCATION"
+# secondary_category "MUSIC"
+
+# For more information: https://docs.fastlane.tools/actions/deliver/
